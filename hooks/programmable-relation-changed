@@ -1,0 +1,10 @@
+#!/bin/bash
+
+relation-set domain='example.com'
+relation-set alias='dtest'
+relation-set addr=`unit-get public-address`
+relation-set rr='A'
+
+NAMESERVER=`relation-get public-address`
+echo "nameserver $NAMESERVER" >> /etc/resolvconf/resolv.conf.d/head
+service resolvconf restart

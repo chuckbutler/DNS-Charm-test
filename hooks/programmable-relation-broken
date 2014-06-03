@@ -1,0 +1,6 @@
+#!/bin/bash
+
+relation-set domain='example.com'
+relation-set alias='dtest'
+relation-set addr=`unit-get public-address`
+relation-set rr='A'

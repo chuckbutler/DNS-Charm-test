@@ -1,0 +1,16 @@
+name: dtest
+summary: <Fill in summary here>
+maintainer: charles <charles@desktop>
+description: |
+  <Multi-line description here>
+categories:
+  - misc
+subordinate: false
+provides:
+  nothing:
+    interface: none
+requires:
+  programmable:
+    interface: DNS
+  programmable-multiple:
+    interface: DNS-MULTI
