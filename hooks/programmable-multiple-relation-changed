@@ -1,11 +1,15 @@
 #!/bin/bash
+set -e
 
-relation-set domain='example.com'
-relation-set resources='@ IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp
-@ IN NAPTR 2 1 "S" "SIP+D2U" "" _sip._udp
-_sip._tcp IN SRV 0 0 5060 bono-$id'
-# _sip._udp IN SRV 0 0 5060 bono-$id'
+id=$(cut -d/ -f2 <<< $JUJU_UNIT_NAME)
+ip=$(dig +short $(unit-get private-address) | head -1)
+relation-set domain=$(config-get zone)
+relation-set resources='sprout '$TTL' IN A '$ip'
+sprout '$TTL' IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp.sprout
+_sip._tcp.sprout '$TTL' IN SRV 0 0 5054 sprout-'$id'
+sprout-'$id' '$TTL' IN A '$ip
 
-NAMESERVER=`relation-get public-address`
-echo "nameserver $NAMESERVER" >> /etc/resolvconf/resolv.conf.d/head
+# Update our DNS server
+[ "$(relation-get public-address)" = "" ] || echo nameserver $(relation-get public-address) > /etc/resolvconf/resolv.conf.d/head
 service resolvconf restart
+
