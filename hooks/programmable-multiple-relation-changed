@@ -1,13 +1,34 @@
 #!/bin/bash
-set -e
+set -ex
 
 id=$(cut -d/ -f2 <<< $JUJU_UNIT_NAME)
 ip=$(dig +short $(unit-get private-address) | head -1)
 relation-set domain=$(config-get zone)
-relation-set resources='sprout '$TTL' IN A '$ip'
-sprout '$TTL' IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp.sprout
-_sip._tcp.sprout '$TTL' IN SRV 0 0 5054 sprout-'$id'
-sprout-'$id' '$TTL' IN A '$ip
+
+RESOURCE_STRING=$(cat <<NOMOREJSON
+[
+    { "rr": "A", "alias": "sprout", "addr", "${ip}" },
+    { "rr": "NAPTR", "alias": "sprout", "ttl": "${TTL}",
+      "order": 1, "pref": 1, "flag": "S", "params": "SIP+D2T",
+      "replace": "_sip._tcp.sprout" },
+    { "rr": "SRV", "alias": "_sip._tcp.sprout", "ttl": "${TTL}",
+      "priority": 1, "weight": 1, "port": 5054,
+      "target": "_sip._tcp.sprout" },
+    { "alias": "sprout-${id}", "ttl": "${TTL}", "rr": "A",
+      "addr": "${ip}"}
+]
+NOMOREJSON)
+
+echo "Raw String:"
+echo $RESOURCE_STRING|tr '\n' ' '
+echo ""
+
+relation-set resources="$RESOURCE_STRING"
+
+#relation-set resources='sprout '$TTL' IN A '$ip'
+#sprout '$TTL' IN NAPTR 1 1 "S" "SIP+D2T" "" _sip._tcp.sprout
+#_sip._tcp.sprout '$TTL' IN SRV 0 0 5054 sprout-'$id'
+#sprout-'$id' '$TTL' IN A '$ip
 
 # Update our DNS server
 [ "$(relation-get public-address)" = "" ] || echo nameserver $(relation-get public-address) > /etc/resolvconf/resolv.conf.d/head

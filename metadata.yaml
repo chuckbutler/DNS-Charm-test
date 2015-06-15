@@ -1,8 +1,7 @@
 name: dtest
-summary: <Fill in summary here>
-maintainer: charles <charles@desktop>
-description: |
-  <Multi-line description here>
+summary: dummy charm to test the DNS charm
+maintainer: charles <charles.butler@ubuntu.com>
+description: dummy charm to test the DNS charm. no useful function otherwise
 categories:
   - misc
 subordinate: false
@@ -11,6 +10,6 @@ provides:
     interface: none
 requires:
   programmable:
-    interface: DNS
+    interface: dns
   programmable-multiple:
-    interface: DNS-MULTI
+    interface: dns-multi
