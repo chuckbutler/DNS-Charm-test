@@ -5,6 +5,12 @@ id=$(cut -d/ -f2 <<< $JUJU_UNIT_NAME)
 ip=$(dig +short $(unit-get private-address) | head -1)
 relation-set domain=$(config-get zone)
 
+# handle failure case of dig not getting an IP from the DNS host.
+# This only makes a difference in AWS anyway.
+if [ -z $ip ]; then
+    ip=$(unit-get private-address)
+fi
+
 RESOURCE_STRING=$(cat <<EOF
 [
     { "rr": "A", "alias": "sprout", "addr": "${ip}" },
@@ -31,6 +37,6 @@ relation-set resources="$RESOURCE_STRING"
 #sprout-'$id' '$TTL' IN A '$ip
 
 # Update our DNS server
-[ "$(relation-get public-address)" = "" ] || echo nameserver $(relation-get public-address) > /etc/resolvconf/resolv.conf.d/head
+[ "$(relation-get private-address)" = "" ] || echo nameserver $(relation-get private-address) > /etc/resolvconf/resolv.conf.d/head
 service resolvconf restart
 

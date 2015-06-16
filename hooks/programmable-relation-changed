@@ -5,6 +5,7 @@ relation-set alias='dtest'
 relation-set addr=`unit-get public-address`
 relation-set rr='A'
 
-NAMESERVER=`relation-get public-address`
+NAMESERVER=`relation-get private-address`
+
 echo "nameserver $NAMESERVER" >> /etc/resolvconf/resolv.conf.d/head
 service resolvconf restart
