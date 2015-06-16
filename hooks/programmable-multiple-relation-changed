@@ -5,9 +5,9 @@ id=$(cut -d/ -f2 <<< $JUJU_UNIT_NAME)
 ip=$(dig +short $(unit-get private-address) | head -1)
 relation-set domain=$(config-get zone)
 
-RESOURCE_STRING=$(cat <<NOMOREJSON
+RESOURCE_STRING=$(cat <<EOF
 [
-    { "rr": "A", "alias": "sprout", "addr", "${ip}" },
+    { "rr": "A", "alias": "sprout", "addr": "${ip}" },
     { "rr": "NAPTR", "alias": "sprout", "ttl": "${TTL}",
       "order": 1, "pref": 1, "flag": "S", "params": "SIP+D2T",
       "replace": "_sip._tcp.sprout" },
@@ -17,7 +17,7 @@ RESOURCE_STRING=$(cat <<NOMOREJSON
     { "alias": "sprout-${id}", "ttl": "${TTL}", "rr": "A",
       "addr": "${ip}"}
 ]
-NOMOREJSON)
+EOF)
 
 echo "Raw String:"
 echo $RESOURCE_STRING|tr '\n' ' '
